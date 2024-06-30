@@ -18,14 +18,14 @@ fn on_request_minimal(r: zap.Request) void {
 
 pub fn main() !void {
     var listener = zap.HttpListener.init(.{
-        .port = 3000,
+        .port = 3500,
         .on_request = on_request_verbose,
         .log = true,
         .max_clients = 100000,
     });
     try listener.listen();
 
-    std.debug.print("Listening on 0.0.0.0:3000\n", .{});
+    std.debug.print("Listening on 0.0.0.0:3500\n", .{});
 
     // start worker threads
     zap.start(.{
