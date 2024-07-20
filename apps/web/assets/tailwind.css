@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #ffffff;
+    --bg-sec: #e5e5e5;
+    --text: #e3e3e5;
+    --load: #d7d7d7;
+    --reactive: #ff00e9;
+    --reactive-sec: #ff00d5;
+  }
+
+  .dark {
+    --bg: #3b3b3b;
+    --bg-sec: #474554;
+    --text: #ffffff;
+    --load: #474747;
+    --reactive: #ff00e9;
+    --reactive-sec: #ff00d5;
+  }
+}
