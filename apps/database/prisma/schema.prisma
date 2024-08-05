@@ -1,14 +1,169 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 generator client {
   provider = "prisma-client-js"
 }
 
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+// ==============================
+// ==========( Person )==========
+// ==============================
+
+model Person {
+    id Int @id @default(autoincrement())
+    cid String
+    name String
+    dob DateTime
+    address String
+    phoneNumber String
+    email String   @unique
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    employee Employee?
+    customer Customer?
+}
+
+// ==============================
+// =========( Customer )=========
+// ==============================
+
+enum CustomerTypes {
+    NORMAL
+    GOLD
+    PLATINUM
+    UNIVERSE
+}
+
+model Customer {
+    id Int @id @default(autoincrement())
+    email String
+    passwordHash String
+    passwordSalt String
+    personId Int @unique
+    phoneNumber String
+    type CustomerTypes @default(NORMAL)
+    cards Card[]
+    accounts Account[]
+    documents Document[]
+    person Person @relation(fields: [personId], references: [id])
+}
+
+model Document {
+  id Int @id @default(autoincrement())
+  documentType String
+  documentUrl String
+  customerId Int @unique
+  uploadedAt DateTime  @default(now())
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+
+// ==============================
+// =========( Employee )=========
+// ==============================
+
+enum PermissionTypes {
+    SOmthing
+}
+
+enum EmployeeTypes {
+    TELLER
+    MANAGER
+    CUSTOMERSERVICE
+}
+
+model Permissions {
+    id Int @id @default(autoincrement())
+    type EmployeeTypes
+    permission PermissionTypes
+}
+
+model Employee {
+    id Int @id @default(autoincrement())
+    type EmployeeTypes @default(TELLER)
+    email String
+    passwordHash String
+    passwordSalt String
+    person Person @relation(fields: [personId], references: [id])
+    personId Int @unique
+}
+
+// ==============================
+// ===========( Card )===========
+// ==============================
+
+enum CardType {
+    DEBIT
+    CREDIT
+}
+
+enum CardStatus {
+    ACTIVE
+    INACTIVE
+    BLOCKED
+}
+
+model Card {
+  id Int @id @default(autoincrement())
+  number String @unique
+  type CardType
+  customerId Int
+  status CardStatus
+  expiryDate DateTime
+  transactions Transaction[] @relation("CardTransactions")
+  customer Customer @relation(fields: [customerId], references: [id])
+}
+
+// ==============================
+// ==========( Account )=========
+// ==============================
+
+enum AccountType {
+    SAVINGS
+    CHECKING
+    CREDIT
+}
+
+model Account {
+    id Int @id @default(autoincrement())
+    customerId Int
+    type AccountType
+    balance Float @default(0.0)
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    customer Customer @relation(fields: [customerId], references: [id])
+    transactions Transaction[] @relation("AccountTransactions")
+    recipientTransactions Transaction[] @relation("RecipientTransactions")
+}
+
+// ==============================
+// ========( Transaction )=======
+// ==============================
+
+enum TransactionTypes {
+    WITHDRAWL
+    TRANSFER
+    DEPOSIT
+}
+
+enum TransactionStatus {
+    PENDING
+    COMPLETED
+    FAILED
+}
+
+model Transaction {
+    id Int @id @default(autoincrement())
+    amount Float
+    cardId Int? 
+    accountId Int 
+    recipientId Int?
+    type TransactionTypes
+    status TransactionStatus
+    date DateTime  @default(now())
+    card Card? @relation("CardTransactions", fields: [cardId], references: [id])
+    account Account @relation("AccountTransactions", fields: [accountId], references: [id])
+    recipient Account? @relation("RecipientTransactions", fields: [recipientId], references: [id])
 }
